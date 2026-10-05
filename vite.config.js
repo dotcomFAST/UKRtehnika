@@ -1,14 +1,18 @@
+import { copyFileSync, writeFileSync } from 'node:fs'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 
-// https://vite.dev/config/
-const repositoryName = process.env.GITHUB_REPOSITORY?.split('/')[1]
+const pagesFiles = {
+  name: 'github-pages-branch-files',
+  closeBundle() {
+    copyFileSync('docs/index.html', 'docs/404.html')
+    writeFileSync('docs/.nojekyll', '')
+  },
+}
 
-export default defineConfig({
-  base:
-    process.env.GITHUB_ACTIONS === 'true' && repositoryName
-      ? `/${repositoryName}/`
-      : '/',
-  plugins: [react(), tailwindcss()],
-})
+export default defineConfig(({ command }) => ({
+  base: command === 'build' ? '/UKRtehnika/' : '/',
+  build: { outDir: 'docs', emptyOutDir: true },
+  plugins: [react(), tailwindcss(), pagesFiles],
+}))
